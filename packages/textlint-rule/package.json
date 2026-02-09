@@ -1,0 +1,54 @@
+{
+  "name": "textlint-rule-frontmatter-type",
+  "version": "0.1.0",
+  "description": "textlint rule to validate frontmatter against TypeScript type definitions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "textlint",
+    "frontmatter",
+    "typescript",
+    "lint",
+    "markdown"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "frontmatter-lint": "workspace:*"
+  },
+  "devDependencies": {
+    "@textlint/ast-node-types": "^14.0.0",
+    "@textlint/kernel": "15.5.1",
+    "@textlint/textlint-plugin-markdown": "15.5.1",
+    "@textlint/types": "^14.0.0",
+    "@types/node": "^25.2.2",
+    "textlint": "^14.0.0",
+    "textlint-tester": "15.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "textlint": ">=12.0.0",
+    "typescript": ">=5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

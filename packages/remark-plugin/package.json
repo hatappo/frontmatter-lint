@@ -1,0 +1,58 @@
+{
+  "name": "remark-lint-frontmatter-type",
+  "version": "0.1.0",
+  "description": "remark-lint rule to validate frontmatter against TypeScript type definitions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "remark",
+    "remark-lint",
+    "unified",
+    "frontmatter",
+    "typescript",
+    "lint",
+    "markdown"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "frontmatter-lint": "workspace:*",
+    "unified-lint-rule": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/mdast": "4.0.4",
+    "@types/node": "^25.2.2",
+    "remark": "^15.0.0",
+    "remark-cli": "12.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-lint": "^10.0.0",
+    "typescript": "^5.9.3",
+    "vfile": "^6.0.0",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "remark": ">=14.0.0",
+    "remark-frontmatter": ">=5.0.0",
+    "typescript": ">=5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

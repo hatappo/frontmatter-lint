@@ -1,0 +1,50 @@
+{
+  "name": "markdownlint-rule-frontmatter-type",
+  "version": "0.1.0",
+  "description": "markdownlint rule to validate frontmatter against TypeScript type definitions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "keywords": [
+    "markdownlint",
+    "frontmatter",
+    "typescript",
+    "lint",
+    "markdown"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "frontmatter-lint": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.2",
+    "markdownlint": "^0.37.0",
+    "markdownlint-cli2": "0.20.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "markdownlint": ">=0.30.0",
+    "typescript": ">=5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

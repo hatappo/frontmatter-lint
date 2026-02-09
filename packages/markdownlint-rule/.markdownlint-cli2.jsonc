@@ -1,0 +1,7 @@
+{
+  "customRules": ["./dist/index.js"],
+  "config": {
+    "default": false,
+    "frontmatter-type": true
+  }
+}
