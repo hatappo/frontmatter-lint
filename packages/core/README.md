@@ -16,63 +16,21 @@ For Zod schema validation:
 npm install -D frontmatter-lint typescript zod
 ```
 
-## Specifying Type Definitions
+## Schema Specification
 
-Specify the type using a comment in the frontmatter:
+You can set up a schema at the directory level, and optionally override it for individual files.
 
-```markdown
----
-# @type ./types.ts BlogPost
-title: "Hello World"
-date: "2024-01-01"
----
-```
+### Detection Priority
 
-Type definition file (`types.ts`):
+1. Frontmatter comment (per-file override)
+2. `schema.json` in the same directory
+3. `schema.ts` in the same directory
 
-```typescript
-export interface BlogPost {
-  title: string;
-  date: string;
-  author?: string;
-  tags?: string[];
-}
-```
+### Directory-Level (Auto-detection)
 
-### Using Zod Schemas
+Place `schema.json` or `schema.ts` in a directory to apply to all Markdown files in that directory.
 
-```markdown
----
-# @zod ./schema.ts BlogPostSchema
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-Schema file (`schema.ts`):
-
-```typescript
-import { z } from "zod";
-
-export const BlogPostSchema = z.object({
-  title: z.string(),
-  date: z.string(),
-  author: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-});
-```
-
-### Using JSON Schema
-
-```markdown
----
-# @jsonschema ./schema.json
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-Schema file (`schema.json`):
+#### schema.json
 
 ```json
 {
@@ -91,6 +49,68 @@ Schema file (`schema.json`):
 }
 ```
 
+#### schema.ts
+
+Export a single type, interface, or Zod schema:
+
+```typescript
+// TypeScript type
+export interface BlogPost {
+  title: string;
+  date: string;
+  author?: string;
+  tags?: string[];
+}
+```
+
+```typescript
+// Or Zod schema
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+```
+
+**Note:** `schema.ts` must export exactly one schema.
+
+### File-Level (Override)
+
+To use a different schema for a specific file, add a comment in the frontmatter:
+
+#### TypeScript Type
+
+```markdown
+---
+# @type ./types.ts BlogPost
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### Zod Schema
+
+```markdown
+---
+# @zod ./schema.ts BlogPostSchema
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### JSON Schema
+
+```markdown
+---
+# @jsonschema ./schema.json
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
 ## Basic Usage
 
 ```bash
@@ -98,7 +118,7 @@ Schema file (`schema.json`):
 npx fmlint article.md
 
 # Multiple files (glob pattern)
-npx fmlint "content/**/*.md"
+npx fmlint "content/*.md"
 ```
 
 ## Options
@@ -113,26 +133,17 @@ npx fmlint "content/**/*.md"
 
 ```bash
 # Basic usage (extra properties are errors by default)
-npx fmlint "content/**/*.md"
+npx fmlint "content/*.md"
 
 # Allow extra properties
-npx fmlint --allow-extra-props "content/**/*.md"
+npx fmlint --allow-extra-props "content/*.md"
 
 # Require schema annotation
-npx fmlint --require-schema "content/**/*.md"
+npx fmlint --require-schema "content/*.md"
 
 # Disable auto-detection of schema.json/schema.ts
-npx fmlint --no-auto-schema "content/**/*.md"
+npx fmlint --no-auto-schema "content/*.md"
 ```
-
-### Auto-detection
-
-If no schema annotation is present, schemas in the same directory are automatically detected:
-
-1. `schema.json` - Used as JSON Schema
-2. `schema.ts` - Uses the single exported type/interface or Zod schema
-
-**Note:** `schema.ts` must export exactly one schema.
 
 ## Output Example
 

@@ -10,7 +10,7 @@ Markdown のフロントマターを TypeScript の型定義、Zod スキーマ�
 - YAML (`---`) と TOML (`+++`) フロントマター形式に対応
 - 外部ライブラリへの依存を最小限に抑えた自前パーサー実装
 - CLI とエディタプラグインの両方で使用可能
-- `schema.json` の自動検出機能
+- `schema.json` / `schema.ts` の自動検出機能
 
 ## パッケージ
 
@@ -27,7 +27,7 @@ Markdown のフロントマターを TypeScript の型定義、Zod スキーマ�
 
 ```bash
 npm install -D frontmatter-lint typescript
-npx fmlint "content/**/*.md"
+npx fmlint "content/*.md"
 ```
 
 ### markdownlint プラグイン (VSCode 対応)
@@ -46,59 +46,21 @@ npm install -D markdownlint-rule-frontmatter-type markdownlint-cli2 typescript
 }
 ```
 
-## 型定義の指定方法
+## スキーマの指定方法
 
-フロントマター内にコメントで型を指定します：
+ディレクトリ単位でスキーマを設定し、必要に応じて個別ファイルで上書きできます。
 
-### TypeScript 型定義
+### 検出の優先順位
 
-```markdown
----
-# @type ./types.ts BlogPost
-title: "Hello World"
-date: "2024-01-01"
----
-```
+1. フロントマター内のコメント指定（個別上書き）
+2. 同ディレクトリの `schema.json`
+3. 同ディレクトリの `schema.ts`
 
-```typescript
-// types.ts
-export interface BlogPost {
-  title: string;
-  date: string;
-  author?: string;
-}
-```
+### ディレクトリ単位での指定（自動検出）
 
-### Zod スキーマ
+同ディレクトリに `schema.json` または `schema.ts` を配置すると、そのディレクトリ内の全 Markdown ファイルに適用されます。
 
-```markdown
----
-# @zod ./schema.ts BlogPostSchema
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-```typescript
-// schema.ts
-import { z } from "zod";
-
-export const BlogPostSchema = z.object({
-  title: z.string(),
-  date: z.string(),
-  author: z.string().optional(),
-});
-```
-
-### JSON Schema
-
-```markdown
----
-# @jsonschema ./schema.json
-title: "Hello World"
-date: "2024-01-01"
----
-```
+#### schema.json
 
 ```json
 {
@@ -113,14 +75,65 @@ date: "2024-01-01"
 }
 ```
 
-### 自動検出
+#### schema.ts
 
-スキーマ指定コメントがない場合、同じディレクトリにあるスキーマが以下の優先順位で自動検出されます：
+単一の type、interface、または Zod スキーマを export します：
 
-1. `schema.json` - JSON Schema として使用
-2. `schema.ts` - export された単一の type/interface または Zod スキーマを使用
+```typescript
+// TypeScript 型
+export interface BlogPost {
+  title: string;
+  date: string;
+  author?: string;
+}
+```
+
+```typescript
+// または Zod スキーマ
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+});
+```
 
 **注意:** `schema.ts` は1つのスキーマのみを export する必要があります。複数の export がある場合はエラーになります。
+
+### ファイル単位での指定（上書き）
+
+特定のファイルで異なるスキーマを使用する場合、フロントマター内にコメントで指定します：
+
+#### TypeScript 型
+
+```markdown
+---
+# @type ./types.ts BlogPost
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### Zod スキーマ
+
+```markdown
+---
+# @zod ./schema.ts BlogPostSchema
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### JSON Schema
+
+```markdown
+---
+# @jsonschema ./schema.json
+title: "Hello World"
+date: "2024-01-01"
+---
+```
 
 ## CLI オプション
 

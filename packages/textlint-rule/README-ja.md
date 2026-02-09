@@ -22,61 +22,21 @@ npm install -D textlint-rule-frontmatter-type textlint typescript
 }
 ```
 
-## 型定義の指定方法
+## スキーマの指定方法
 
-フロントマター内にコメントで型を指定します：
+ディレクトリ単位でスキーマを設定し、必要に応じて個別ファイルで上書きできます。
 
-### TypeScript 型定義
+### 検出の優先順位
 
-```markdown
----
-# @type ./types.ts BlogPost
-title: "Hello World"
-date: "2024-01-01"
----
-```
+1. フロントマター内のコメント指定（個別上書き）
+2. 同ディレクトリの `schema.json`
+3. 同ディレクトリの `schema.ts`
 
-```typescript
-// types.ts
-export interface BlogPost {
-  title: string;
-  date: string;
-  author?: string;
-  tags?: string[];
-}
-```
+### ディレクトリ単位での指定（自動検出）
 
-### Zod スキーマ
+同ディレクトリに `schema.json` または `schema.ts` を配置すると、そのディレクトリ内の全 Markdown ファイルに適用されます。
 
-```markdown
----
-# @zod ./schema.ts BlogPostSchema
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-```typescript
-// schema.ts
-import { z } from "zod";
-
-export const BlogPostSchema = z.object({
-  title: z.string(),
-  date: z.string(),
-  author: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-});
-```
-
-### JSON Schema
-
-```markdown
----
-# @jsonschema ./schema.json
-title: "Hello World"
-date: "2024-01-01"
----
-```
+#### schema.json
 
 ```json
 {
@@ -95,14 +55,67 @@ date: "2024-01-01"
 }
 ```
 
-### 自動検出
+#### schema.ts
 
-スキーマ指定コメントがない場合、同ディレクトリのスキーマが自動検出されます：
+単一の type、interface、または Zod スキーマを export します：
 
-1. `schema.json` - JSON Schema として使用
-2. `schema.ts` - export された単一の type/interface または Zod スキーマを使用
+```typescript
+// TypeScript 型
+export interface BlogPost {
+  title: string;
+  date: string;
+  author?: string;
+  tags?: string[];
+}
+```
+
+```typescript
+// または Zod スキーマ
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+```
 
 **注意:** `schema.ts` は1つのスキーマのみを export する必要があります。
+
+### ファイル単位での指定（上書き）
+
+特定のファイルで異なるスキーマを使用する場合、フロントマター内にコメントで指定します：
+
+#### TypeScript 型
+
+```markdown
+---
+# @type ./types.ts BlogPost
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### Zod スキーマ
+
+```markdown
+---
+# @zod ./schema.ts BlogPostSchema
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### JSON Schema
+
+```markdown
+---
+# @jsonschema ./schema.json
+title: "Hello World"
+date: "2024-01-01"
+---
+```
 
 ## CLI での実行
 

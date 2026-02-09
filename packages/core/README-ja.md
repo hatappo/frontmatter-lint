@@ -16,63 +16,21 @@ Zod スキーマ検証を使用する場合：
 npm install -D frontmatter-lint typescript zod
 ```
 
-## 型定義の指定方法
+## スキーマの指定方法
 
-フロントマター内にコメントで型を指定します：
+ディレクトリ単位でスキーマを設定し、必要に応じて個別ファイルで上書きできます。
 
-```markdown
----
-# @type ./types.ts BlogPost
-title: "Hello World"
-date: "2024-01-01"
----
-```
+### 検出の優先順位
 
-型定義ファイル (`types.ts`):
+1. フロントマター内のコメント指定（個別上書き）
+2. 同ディレクトリの `schema.json`
+3. 同ディレクトリの `schema.ts`
 
-```typescript
-export interface BlogPost {
-  title: string;
-  date: string;
-  author?: string;
-  tags?: string[];
-}
-```
+### ディレクトリ単位での指定（自動検出）
 
-### Zod スキーマの使用
+同ディレクトリに `schema.json` または `schema.ts` を配置すると、そのディレクトリ内の全 Markdown ファイルに適用されます。
 
-```markdown
----
-# @zod ./schema.ts BlogPostSchema
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-スキーマファイル (`schema.ts`):
-
-```typescript
-import { z } from "zod";
-
-export const BlogPostSchema = z.object({
-  title: z.string(),
-  date: z.string(),
-  author: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-});
-```
-
-### JSON Schema の使用
-
-```markdown
----
-# @jsonschema ./schema.json
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-スキーマファイル (`schema.json`):
+#### schema.json
 
 ```json
 {
@@ -91,6 +49,68 @@ date: "2024-01-01"
 }
 ```
 
+#### schema.ts
+
+単一の type、interface、または Zod スキーマを export します：
+
+```typescript
+// TypeScript 型
+export interface BlogPost {
+  title: string;
+  date: string;
+  author?: string;
+  tags?: string[];
+}
+```
+
+```typescript
+// または Zod スキーマ
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+```
+
+**注意:** `schema.ts` は1つのスキーマのみを export する必要があります。
+
+### ファイル単位での指定（上書き）
+
+特定のファイルで異なるスキーマを使用する場合、フロントマター内にコメントで指定します：
+
+#### TypeScript 型
+
+```markdown
+---
+# @type ./types.ts BlogPost
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### Zod スキーマ
+
+```markdown
+---
+# @zod ./schema.ts BlogPostSchema
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+#### JSON Schema
+
+```markdown
+---
+# @jsonschema ./schema.json
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
 ## 基本的な使用方法
 
 ```bash
@@ -98,7 +118,7 @@ date: "2024-01-01"
 npx fmlint article.md
 
 # 複数ファイル（glob パターン）
-npx fmlint "content/**/*.md"
+npx fmlint "content/*.md"
 ```
 
 ## オプション
@@ -113,26 +133,17 @@ npx fmlint "content/**/*.md"
 
 ```bash
 # 基本的な使い方（デフォルトで余分なプロパティはエラー）
-npx fmlint "content/**/*.md"
+npx fmlint "content/*.md"
 
 # 余分なプロパティを許可
-npx fmlint --allow-extra-props "content/**/*.md"
+npx fmlint --allow-extra-props "content/*.md"
 
 # スキーマ指定を必須にする
-npx fmlint --require-schema "content/**/*.md"
+npx fmlint --require-schema "content/*.md"
 
 # schema.json/schema.ts の自動検出を無効化
-npx fmlint --no-auto-schema "content/**/*.md"
+npx fmlint --no-auto-schema "content/*.md"
 ```
-
-### 自動検出
-
-スキーマ指定コメントがない場合、同ディレクトリのスキーマが自動検出されます：
-
-1. `schema.json` - JSON Schema として使用
-2. `schema.ts` - export された単一の type/interface または Zod スキーマを使用
-
-**注意:** `schema.ts` は1つのスキーマのみを export する必要があります。
 
 ## 出力例
 

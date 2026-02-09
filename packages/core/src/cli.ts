@@ -51,7 +51,7 @@ Options:
 
 Examples:
   fmlint posts/*.md
-  fmlint --allow-extra-props content/**/*.md
+  fmlint --allow-extra-props content/*.md
   fmlint --require-schema posts/*.md
 
 Schema annotation in frontmatter:
