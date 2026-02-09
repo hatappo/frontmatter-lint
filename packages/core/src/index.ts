@@ -24,6 +24,7 @@ function createErrorResult(
   return {
     file,
     valid: false,
+    skipped: false,
     errors: [{ code, message }],
   };
 }
@@ -35,6 +36,19 @@ function createSuccessResult(file: string): LintResult {
   return {
     file,
     valid: true,
+    skipped: false,
+    errors: [],
+  };
+}
+
+/**
+ * Create a skipped result for a file (no schema found)
+ */
+function createSkippedResult(file: string): LintResult {
+  return {
+    file,
+    valid: true,
+    skipped: true,
     errors: [],
   };
 }
@@ -203,7 +217,7 @@ export async function lintContent(
   // Extract frontmatter
   const frontmatter = extractFrontmatter(content);
   if (!frontmatter) {
-    return createSuccessResult(filePath);
+    return createSkippedResult(filePath);
   }
 
   // Get type reference
@@ -245,7 +259,7 @@ export async function lintContent(
       );
     }
     // Skip if requireSchema is not set
-    return createSuccessResult(filePath);
+    return createSkippedResult(filePath);
   }
 
   // Run validation based on schema kind
@@ -289,6 +303,7 @@ export async function lintContent(
   return {
     file: filePath,
     valid: errors.length === 0,
+    skipped: false,
     errors,
   };
 }

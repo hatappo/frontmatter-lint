@@ -97,6 +97,10 @@ function printVersion(): void {
 }
 
 function formatResult(result: LintResult): string {
+  if (result.skipped) {
+    return `- ${result.file} (skipped)`;
+  }
+
   if (result.valid) {
     return `✓ ${result.file}`;
   }
@@ -176,11 +180,12 @@ async function main(): Promise<void> {
 
   // Summary
   const total = results.length;
-  const passed = results.filter((r) => r.valid).length;
-  const failed = total - passed;
+  const skipped = results.filter((r) => r.skipped).length;
+  const passed = results.filter((r) => r.valid && !r.skipped).length;
+  const failed = results.filter((r) => !r.valid).length;
 
   console.log("");
-  console.log(`Total: ${total} files, Passed: ${passed}, Failed: ${failed}`);
+  console.log(`Total: ${total} files, Passed: ${passed}, Skipped: ${skipped}, Failed: ${failed}`);
 
   if (failed > 0) {
     process.exit(1);

@@ -1,5 +1,4 @@
 ---
-# @zod ./schema.ts BlogPostSchema
 title: "Validating Frontmatter with Zod Schema"
 date: "2024-01-15"
 author: "Developer"

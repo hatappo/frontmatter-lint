@@ -1,5 +1,5 @@
 +++
-# @zod ./schema.ts BlogPostSchema
+# @zod ./blog-schema.ts BlogPostSchema
 title = "Using Zod with TOML Frontmatter"
 date = "2024-01-20"
 author = "Developer"

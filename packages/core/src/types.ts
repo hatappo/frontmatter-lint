@@ -102,6 +102,8 @@ export interface LintResult {
   file: string;
   /** Whether validation succeeded */
   valid: boolean;
+  /** Whether validation was skipped (no schema found) */
+  skipped: boolean;
   /** Array of errors */
   errors: ValidationError[];
 }
