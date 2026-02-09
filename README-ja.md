@@ -79,6 +79,17 @@ date: "2024-01-01"
 ---
 ```
 
+```typescript
+// schema.ts
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+});
+```
+
 ### JSON Schema
 
 ```markdown
@@ -89,9 +100,27 @@ date: "2024-01-01"
 ---
 ```
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "date": { "type": "string" },
+    "author": { "type": "string" }
+  },
+  "required": ["title", "date"]
+}
+```
+
 ### 自動検出
 
-スキーマ指定コメントがない場合、同じディレクトリにある `schema.json` が自動的に使用されます。
+スキーマ指定コメントがない場合、同じディレクトリにあるスキーマが以下の優先順位で自動検出されます：
+
+1. `schema.json` - JSON Schema として使用
+2. `schema.ts` - export された単一の type/interface または Zod スキーマを使用
+
+**注意:** `schema.ts` は1つのスキーマのみを export する必要があります。複数の export がある場合はエラーになります。
 
 ## CLI オプション
 
@@ -101,7 +130,7 @@ fmlint [options] <files...>
 Options:
   --allow-extra-props    スキーマに定義されていないプロパティを許可
   --require-schema       スキーマ指定コメントを必須にする
-  --no-auto-schema       schema.json の自動検出を無効化
+  --no-auto-schema       schema.json/schema.ts の自動検出を無効化
 ```
 
 デフォルトでは、スキーマに定義されていないプロパティはエラーとして報告されます。

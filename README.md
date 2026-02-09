@@ -79,6 +79,17 @@ date: "2024-01-01"
 ---
 ```
 
+```typescript
+// schema.ts
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+});
+```
+
 ### JSON Schema
 
 ```markdown
@@ -89,9 +100,27 @@ date: "2024-01-01"
 ---
 ```
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "date": { "type": "string" },
+    "author": { "type": "string" }
+  },
+  "required": ["title", "date"]
+}
+```
+
 ### Auto-detection
 
-If no schema annotation is present, `schema.json` in the same directory will be automatically used if it exists.
+If no schema annotation is present, schemas in the same directory are automatically detected in the following order:
+
+1. `schema.json` - Used as JSON Schema
+2. `schema.ts` - Uses the single exported type/interface or Zod schema
+
+**Note:** `schema.ts` must export exactly one schema. If multiple exports are found, an error is reported.
 
 ## CLI Options
 
@@ -101,7 +130,7 @@ fmlint [options] <files...>
 Options:
   --allow-extra-props     Allow properties not defined in schema
   --require-schema        Require schema annotation comment
-  --no-auto-schema        Disable auto-detection of schema.json
+  --no-auto-schema        Disable auto-detection of schema.json/schema.ts
 ```
 
 By default, properties not defined in the schema are reported as errors.

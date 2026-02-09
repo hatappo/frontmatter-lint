@@ -62,6 +62,35 @@ export const BlogPostSchema = z.object({
 });
 ```
 
+### JSON Schema の使用
+
+```markdown
+---
+# @jsonschema ./schema.json
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+スキーマファイル (`schema.json`):
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "date": { "type": "string" },
+    "author": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["title", "date"]
+}
+```
+
 ## 基本的な使用方法
 
 ```bash
@@ -78,7 +107,7 @@ npx fmlint "content/**/*.md"
 |-----------|------|
 | `--allow-extra-props` | スキーマに定義されていないプロパティを許可 |
 | `--require-schema` | スキーマ指定コメントがないファイルをエラーとして報告 |
-| `--no-auto-schema` | 同ディレクトリの `schema.json` の自動検出を無効化 |
+| `--no-auto-schema` | `schema.json`/`schema.ts` の自動検出を無効化 |
 
 ### 使用例
 
@@ -92,9 +121,18 @@ npx fmlint --allow-extra-props "content/**/*.md"
 # スキーマ指定を必須にする
 npx fmlint --require-schema "content/**/*.md"
 
-# schema.json の自動検出を無効化
+# schema.json/schema.ts の自動検出を無効化
 npx fmlint --no-auto-schema "content/**/*.md"
 ```
+
+### 自動検出
+
+スキーマ指定コメントがない場合、同ディレクトリのスキーマが自動検出されます：
+
+1. `schema.json` - JSON Schema として使用
+2. `schema.ts` - export された単一の type/interface または Zod スキーマを使用
+
+**注意:** `schema.ts` は1つのスキーマのみを export する必要があります。
 
 ## 出力例
 

@@ -62,6 +62,35 @@ export const BlogPostSchema = z.object({
 });
 ```
 
+### Using JSON Schema
+
+```markdown
+---
+# @jsonschema ./schema.json
+title: "Hello World"
+date: "2024-01-01"
+---
+```
+
+Schema file (`schema.json`):
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "date": { "type": "string" },
+    "author": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["title", "date"]
+}
+```
+
 ## Basic Usage
 
 ```bash
@@ -78,7 +107,7 @@ npx fmlint "content/**/*.md"
 |--------|-------------|
 | `--allow-extra-props` | Allow properties not defined in schema |
 | `--require-schema` | Report files without schema annotation as errors |
-| `--no-auto-schema` | Disable auto-detection of `schema.json` in the same directory |
+| `--no-auto-schema` | Disable auto-detection of `schema.json`/`schema.ts` |
 
 ### Usage Examples
 
@@ -92,9 +121,18 @@ npx fmlint --allow-extra-props "content/**/*.md"
 # Require schema annotation
 npx fmlint --require-schema "content/**/*.md"
 
-# Disable auto-detection of schema.json
+# Disable auto-detection of schema.json/schema.ts
 npx fmlint --no-auto-schema "content/**/*.md"
 ```
+
+### Auto-detection
+
+If no schema annotation is present, schemas in the same directory are automatically detected:
+
+1. `schema.json` - Used as JSON Schema
+2. `schema.ts` - Uses the single exported type/interface or Zod schema
+
+**Note:** `schema.ts` must export exactly one schema.
 
 ## Output Example
 

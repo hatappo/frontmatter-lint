@@ -59,6 +59,18 @@ date: "2024-01-01"
 ---
 ```
 
+```typescript
+// schema.ts
+import { z } from "zod";
+
+export const BlogPostSchema = z.object({
+  title: z.string(),
+  date: z.string(),
+  author: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+```
+
 ### JSON Schema
 
 ```markdown
@@ -69,9 +81,31 @@ date: "2024-01-01"
 ---
 ```
 
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "date": { "type": "string" },
+    "author": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["title", "date"]
+}
+```
+
 ### Auto-detection
 
-If no schema annotation is present, `schema.json` in the same directory will be automatically used if it exists.
+If no schema annotation is present, schemas in the same directory are automatically detected:
+
+1. `schema.json` - Used as JSON Schema
+2. `schema.ts` - Uses the single exported type/interface or Zod schema
+
+**Note:** `schema.ts` must export exactly one schema.
 
 ## CLI Usage
 
@@ -118,7 +152,7 @@ Configure options in `.markdownlint-cli2.jsonc`:
 |--------|------|---------|-------------|
 | `allowExtraProps` | `boolean` | `false` | Allow properties not defined in the schema |
 | `requireSchema` | `boolean` | `false` | Report files without schema annotation as errors |
-| `noAutoSchema` | `boolean` | `false` | Disable auto-detection of `schema.json` in the same directory |
+| `noAutoSchema` | `boolean` | `false` | Disable auto-detection of `schema.json`/`schema.ts` |
 
 ## Rule Information
 
