@@ -61,6 +61,106 @@ type AutoDetectResult =
   | { success: false; error: { code: "MULTIPLE_SCHEMAS_FOUND" | "NO_SCHEMA_IN_FILE"; message: string } };
 
 /**
+ * Result of resolving "auto" kind
+ */
+type ResolveAutoResult =
+  | { success: true; kind: "typescript" | "zod" }
+  | { success: false; error: { code: ValidationError["code"]; message: string } };
+
+/**
+ * Resolve "auto" kind to "typescript" or "zod" by analyzing the exported value
+ * @param filePath - Path to the .ts file (relative)
+ * @param typeName - Name of the export to check
+ * @param basePath - Base directory
+ * @returns Resolved kind or error
+ */
+async function resolveAutoKind(
+  filePath: string,
+  typeName: string,
+  basePath: string
+): Promise<ResolveAutoResult> {
+  const absolutePath = path.resolve(basePath, filePath);
+
+  if (!fs.existsSync(absolutePath)) {
+    return {
+      success: false,
+      error: {
+        code: "FILE_NOT_FOUND",
+        message: `Schema file not found: ${filePath}`,
+      },
+    };
+  }
+
+  // If no typeName specified, analyze the file to find the single export
+  if (!typeName) {
+    const analysis = analyzeSchemaFile(filePath, basePath);
+    const typeCount = analysis.types.length + analysis.interfaces.length;
+
+    // Check for Zod schemas
+    const zodSchemas: string[] = [];
+    if (analysis.values.length > 0) {
+      try {
+        const fileUrl = pathToFileURL(absolutePath).href;
+        const module = await import(fileUrl);
+
+        for (const valueName of analysis.values) {
+          const value = valueName === "default" ? module.default : module[valueName];
+          if (value && typeof value === "object" && "safeParse" in value) {
+            zodSchemas.push(valueName);
+          }
+        }
+      } catch {
+        // Import failed
+      }
+    }
+
+    const totalSchemas = typeCount + zodSchemas.length;
+
+    if (totalSchemas === 0) {
+      return {
+        success: false,
+        error: {
+          code: "NO_SCHEMA_IN_FILE",
+          message: `No exported type, interface, or Zod schema found in ${filePath}`,
+        },
+      };
+    }
+
+    if (totalSchemas > 1) {
+      const allNames = [...analysis.types, ...analysis.interfaces, ...zodSchemas];
+      return {
+        success: false,
+        error: {
+          code: "MULTIPLE_SCHEMAS_FOUND",
+          message: `Multiple schemas found in ${filePath}: ${allNames.join(", ")}. Please specify the schema name.`,
+        },
+      };
+    }
+
+    // Single schema found
+    if (zodSchemas.length === 1) {
+      return { success: true, kind: "zod" };
+    }
+    return { success: true, kind: "typescript" };
+  }
+
+  // typeName is specified, check if it's a Zod schema
+  try {
+    const fileUrl = pathToFileURL(absolutePath).href;
+    const module = await import(fileUrl);
+    const value = typeName === "default" ? module.default : module[typeName];
+
+    if (value && typeof value === "object" && "safeParse" in value) {
+      return { success: true, kind: "zod" };
+    }
+  } catch {
+    // Import failed, assume TypeScript type
+  }
+
+  return { success: true, kind: "typescript" };
+}
+
+/**
  * Auto-detect schema from schema.ts
  * @param basePath - Base directory containing schema.ts
  * @returns TypeReference if exactly one schema is found, error otherwise
@@ -255,17 +355,27 @@ export async function lintContent(
       return createErrorResult(
         filePath,
         "MISSING_SCHEMA_ANNOTATION",
-        "Frontmatter is missing # @type, # @zod, or # @jsonschema comment"
+        "Frontmatter is missing # @schema comment"
       );
     }
     // Skip if requireSchema is not set
     return createSkippedResult(filePath);
   }
 
+  // Resolve "auto" kind for .ts files
+  let resolvedKind = typeRef.kind;
+  if (typeRef.kind === "auto") {
+    const resolveResult = await resolveAutoKind(typeRef.filePath, typeRef.typeName, basePath);
+    if (!resolveResult.success) {
+      return createErrorResult(filePath, resolveResult.error.code, resolveResult.error.message);
+    }
+    resolvedKind = resolveResult.kind;
+  }
+
   // Run validation based on schema kind
   let errors: ValidationError[];
 
-  if (typeRef.kind === "zod") {
+  if (resolvedKind === "zod") {
     // Validate with Zod schema
     errors = await validateWithZod(
       frontmatter.data,
@@ -274,7 +384,7 @@ export async function lintContent(
       basePath,
       resolvedOptions
     );
-  } else if (typeRef.kind === "jsonschema") {
+  } else if (resolvedKind === "jsonschema") {
     // Validate with JSON Schema
     errors = validateWithJsonSchema(
       frontmatter.data,

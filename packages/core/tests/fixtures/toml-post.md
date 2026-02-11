@@ -1,5 +1,5 @@
 +++
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title = "TOML Frontmatter Example"
 date = "2024-01-01"
 author = "John Doe"

@@ -1,5 +1,5 @@
 ---
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 title: "Hello World"
 date: "2024-01-01"
 author: "John Doe"

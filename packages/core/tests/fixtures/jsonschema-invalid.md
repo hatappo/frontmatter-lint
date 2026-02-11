@@ -1,5 +1,5 @@
 ---
-# @jsonschema ./blog-schema.json
+# @schema ./blog-schema.json
 title: "Missing Date"
 author: "John Doe"
 ---

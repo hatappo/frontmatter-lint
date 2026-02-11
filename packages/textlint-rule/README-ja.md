@@ -85,37 +85,19 @@ export const BlogPostSchema = z.object({
 
 ### ファイル単位での指定（上書き）
 
-特定のファイルで異なるスキーマを使用する場合、フロントマター内にコメントで指定します：
-
-#### TypeScript 型
+特定のファイルで異なるスキーマを使用する場合、フロントマター内に `@schema` コメントで指定します：
 
 ```markdown
 ---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "Hello World"
 date: "2024-01-01"
 ---
 ```
 
-#### Zod スキーマ
-
-```markdown
----
-# @zod ./schema.ts BlogPostSchema
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-#### JSON Schema
-
-```markdown
----
-# @jsonschema ./schema.json
-title: "Hello World"
-date: "2024-01-01"
----
-```
+スキーマの種類はファイル拡張子と内容に基づいて自動的に判別されます：
+- `.json` ファイルは JSON Schema として扱われます
+- `.ts` ファイルは TypeScript 型か Zod スキーマかを解析して判別します
 
 ## CLI での実行
 

@@ -79,37 +79,19 @@ export const BlogPostSchema = z.object({
 
 ### File-Level (Override)
 
-To use a different schema for a specific file, add a comment in the frontmatter:
-
-#### TypeScript Type
+To use a different schema for a specific file, add a `@schema` comment in the frontmatter:
 
 ```markdown
 ---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "Hello World"
 date: "2024-01-01"
 ---
 ```
 
-#### Zod Schema
-
-```markdown
----
-# @zod ./schema.ts BlogPostSchema
-title: "Hello World"
-date: "2024-01-01"
----
-```
-
-#### JSON Schema
-
-```markdown
----
-# @jsonschema ./schema.json
-title: "Hello World"
-date: "2024-01-01"
----
-```
+The schema type is automatically detected based on the file extension and content:
+- `.json` files are treated as JSON Schema
+- `.ts` files are analyzed to determine if they export a TypeScript type or Zod schema
 
 ## Basic Usage
 
@@ -162,7 +144,7 @@ Total: 2 files, Passed: 1, Failed: 1
 
 ```markdown
 ---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "Hello World"
 date: "2024-01-01"
 tags:
@@ -175,7 +157,7 @@ tags:
 
 ```markdown
 +++
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title = "Hello World"
 date = "2024-01-01"
 tags = ["typescript", "markdown"]
@@ -200,7 +182,7 @@ if (!result.valid) {
 
 // Validate content directly
 const content = `---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "Hello"
 ---`;
 

@@ -22,7 +22,7 @@ Content here.
 
   it("should extract type reference", () => {
     const content = `---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: Hello
 ---
 
@@ -31,7 +31,7 @@ Content.
     const result = extractFrontmatter(content);
     expect(result).not.toBeNull();
     expect(result!.typeRef).toEqual({
-      kind: "typescript",
+      kind: "auto",
       filePath: "./types.ts",
       typeName: "BlogPost",
     });
@@ -62,7 +62,7 @@ Content.
 
   it("should parse complex frontmatter", () => {
     const content = `---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "My Post"
 tags:
   - tech
@@ -119,7 +119,7 @@ Content here.
 
   it("should extract type reference from TOML", () => {
     const content = `+++
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title = "Hello"
 +++
 
@@ -129,7 +129,7 @@ Content.
     expect(result).not.toBeNull();
     expect(result!.format).toBe("toml");
     expect(result!.typeRef).toEqual({
-      kind: "typescript",
+      kind: "auto",
       filePath: "./types.ts",
       typeName: "BlogPost",
     });
@@ -140,7 +140,7 @@ Content.
 
   it("should parse complex TOML frontmatter", () => {
     const content = `+++
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title = "My Post"
 tags = ["tech", "programming"]
 

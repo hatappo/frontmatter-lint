@@ -1,5 +1,5 @@
 ---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 date: 2024
 tags: "not-an-array"
 ---

@@ -1,13 +1,13 @@
 /**
  * Schema kind
  */
-export type SchemaKind = "typescript" | "zod" | "jsonschema";
+export type SchemaKind = "typescript" | "zod" | "jsonschema" | "auto";
 
 /**
- * Parsed result of @type / @zod / @jsonschema comment
+ * Parsed result of @schema comment
  */
 export interface TypeReference {
-  /** Schema kind */
+  /** Schema kind ("auto" for .ts files that need analysis) */
   kind: SchemaKind;
   /** Path to type definition file */
   filePath: string;

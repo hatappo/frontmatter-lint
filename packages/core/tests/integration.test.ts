@@ -34,7 +34,7 @@ describe("lintFile", () => {
 });
 
 describe("lintContent", () => {
-  it("should skip files without @type comment", async () => {
+  it("should skip files without @schema comment", async () => {
     const content = `---
 title: Hello
 ---
@@ -61,7 +61,7 @@ Content.
 
   it("should pass when requireSchema is set and schema annotation is present", async () => {
     const content = `---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: Hello
 date: "2024-01-01"
 ---
@@ -76,7 +76,7 @@ Content.
 
   it("should report type not found error", async () => {
     const content = `---
-# @type ./types.ts NonExistentType
+# @schema ./types.ts NonExistentType
 title: Hello
 ---
 
@@ -89,7 +89,7 @@ Content.
 
   it("should validate TOML frontmatter content", async () => {
     const content = `+++
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title = "Hello"
 date = "2024-01-01"
 +++
@@ -118,9 +118,9 @@ describe("Zod schema validation", () => {
     );
   });
 
-  it("should validate with @zod directive in content", async () => {
+  it("should validate with @schema directive for Zod schema in content", async () => {
     const content = `---
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 title: "Test Post"
 date: "2024-05-01"
 ---
@@ -133,7 +133,7 @@ Content.
 
   it("should report error for invalid Zod data", async () => {
     const content = `---
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 title: 123
 date: "2024-05-01"
 ---
@@ -146,9 +146,9 @@ Content.
     expect(result.errors[0].code).toBe("TYPE_MISMATCH");
   });
 
-  it("should report schema not found error", async () => {
+  it("should report type not found error for non-existent export", async () => {
     const content = `---
-# @zod ./zod-schema.ts NonExistentSchema
+# @schema ./zod-schema.ts NonExistentSchema
 title: Hello
 ---
 
@@ -156,12 +156,13 @@ Content.
 `;
     const result = await lintContent(content, "test.md", fixturesDir);
     expect(result.valid).toBe(false);
-    expect(result.errors[0].code).toBe("SCHEMA_NOT_FOUND");
+    // When the export doesn't exist, it falls through to TypeScript validation
+    expect(result.errors[0].code).toBe("TYPE_NOT_FOUND");
   });
 
   it("should validate Zod schema with TOML frontmatter", async () => {
     const content = `+++
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 title = "Hello"
 date = "2024-01-01"
 +++
@@ -174,7 +175,7 @@ Content.
 
   it("should report missing required property with property name", async () => {
     const content = `---
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 date: "2024-01-01"
 ---
 
@@ -188,7 +189,7 @@ Content.
 
   it("should detect extra properties by default", async () => {
     const content = `---
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 title: "Hello"
 date: "2024-01-01"
 extraProp: "should fail"
@@ -204,7 +205,7 @@ Content.
 
   it("should allow extra properties with allowExtraProps: true", async () => {
     const content = `---
-# @zod ./zod-schema.ts BlogPostSchema
+# @schema ./zod-schema.ts BlogPostSchema
 title: "Hello"
 date: "2024-01-01"
 extraProp: "should be allowed"
@@ -240,9 +241,9 @@ describe("JSON Schema validation", () => {
     expect(result.errors[0].path).toBe("draft");
   });
 
-  it("should validate with @jsonschema directive in content", async () => {
+  it("should validate with @schema directive for JSON Schema in content", async () => {
     const content = `---
-# @jsonschema ./blog-schema.json
+# @schema ./blog-schema.json
 title: "Test Post"
 date: "2024-05-01"
 ---
@@ -255,7 +256,7 @@ Content.
 
   it("should report error for schema file not found", async () => {
     const content = `---
-# @jsonschema ./non-existent.json
+# @schema ./non-existent.json
 title: "Hello"
 ---
 
@@ -268,7 +269,7 @@ Content.
 
   it("should detect extra properties by default", async () => {
     const content = `---
-# @jsonschema ./blog-schema.json
+# @schema ./blog-schema.json
 title: "Hello"
 date: "2024-01-01"
 extraProp: "should fail"
@@ -284,7 +285,7 @@ Content.
 
   it("should allow extra properties with allowExtraProps: true", async () => {
     const content = `---
-# @jsonschema ./blog-schema.json
+# @schema ./blog-schema.json
 title: "Hello"
 date: "2024-01-01"
 extraProp: "should be allowed"
@@ -300,7 +301,7 @@ Content.
 
   it("should validate JSON Schema with TOML frontmatter", async () => {
     const content = `+++
-# @jsonschema ./blog-schema.json
+# @schema ./blog-schema.json
 title = "Hello"
 date = "2024-01-01"
 +++
@@ -345,7 +346,7 @@ Content.
 
   it("should prefer explicit schema annotation over auto-detected schema", async () => {
     const content = `---
-# @jsonschema ../blog-schema.json
+# @schema ../blog-schema.json
 title: "Test"
 date: "2024-01-01"
 author: "John"
@@ -429,7 +430,7 @@ describe("Auto-detection of schema.ts", () => {
 describe("TypeScript type validation", () => {
   it("should detect boolean type mismatch", async () => {
     const content = `---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "Test"
 date: "2024-01-01"
 draft: 9999
@@ -445,7 +446,7 @@ Content.
 
   it("should detect array element type mismatch", async () => {
     const content = `---
-# @type ./types.ts BlogPost
+# @schema ./types.ts BlogPost
 title: "Test"
 date: "2024-01-01"
 tags:
